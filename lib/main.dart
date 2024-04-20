@@ -41,9 +41,9 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+  var currentWordPair = WordPair.random();
 
-  void getNext(){ notifyListeners(); current = WordPair.random(); /*notifyListeners();*/ } // order doesn't matter
+  void getNext(){ notifyListeners(); currentWordPair = WordPair.random(); /*notifyListeners();*/ } // order doesn't matter
 }
 
 class MyHomePage extends StatelessWidget {
@@ -52,12 +52,13 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    var pair = appState.currentWordPair;
 
     return Scaffold(
       body: Column(
         children: [
           const Text('A random BS idea:'),
-          Text(appState.current.asLowerCase),
+          BigCard(pair: pair),
 
           // Added this button
           ElevatedButton(
@@ -71,5 +72,19 @@ class MyHomePage extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class BigCard extends StatelessWidget {
+  const BigCard({
+    super.key,
+    required this.pair,
+  });
+
+  final WordPair pair;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(pair.asLowerCase);
   }
 }
