@@ -46,7 +46,19 @@ class MyAppState extends ChangeNotifier {
   void getNext() {
     notifyListeners();
     currentWordPair = WordPair.random(); /*notifyListeners();*/
-  } // order doesn't matter
+  } // order doesn't matter. (Adds to stack and value has already changed by the time it's popped??)
+
+  var favorites =
+      <WordPair>[]; // Final?  The <...> portion is considered a "Generic" -> https://dart.dev/language/generics
+
+  void toggleFavorite() {
+    if (favorites.contains(currentWordPair)) {
+      favorites.remove(currentWordPair);
+    } else {
+      favorites.add(currentWordPair);
+    }
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatelessWidget {
@@ -57,27 +69,56 @@ class MyHomePage extends StatelessWidget {
     var appState = context.watch<MyAppState>();
     var pair = appState.currentWordPair;
 
+     // ↓ Add this.
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
     return Scaffold(
       body: Center(
         child: Column(
           // crossAxisAlignment: CrossAxisAlignment.center,
-           mainAxisAlignment: MainAxisAlignment.center,        
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // const Padding(padding: EdgeInsets.only(left: 450)),
             // const Padding( padding: EdgeInsets.only(left: 100), child: Text('A random Starter App idea:')),
             const Text('A random Starter App idea:'),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             BigCard(pair: pair),
-            const SizedBox(height: 15,),
+            const SizedBox(
+              height: 15,
+            ),
 
             // Added this button
-            ElevatedButton(
-              onPressed: () {
-                print('button pressed');
-                // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
-                appState.getNext();
-              },
-              child: const Text('Next'),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    print('Like button pressed');
+                    // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                    appState.toggleFavorite();
+                  },
+                  icon: Icon(icon),
+                  label: const Text('Like'),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    print('Next button pressed');
+                    // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                    appState.getNext();
+                  },
+                  child: const Text('Next'),
+                ),
+              ],
             )
           ],
         ),
@@ -96,17 +137,23 @@ class BigCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // For consistency, use already defined theme
+    final theme =
+        Theme.of(context); // For consistency, use already defined theme
 
     /// Calling copyWith() on displayMedium returns a copy of the text style with the changes you define.
-    final style = theme.textTheme.displayMedium!.copyWith(color: theme.colorScheme.onPrimary);                                                                                  
+    final style = theme.textTheme.displayMedium!
+        .copyWith(color: theme.colorScheme.onPrimary);
 
     return Card(
       color: theme.colorScheme.primary,
       child: Padding(
         // Flutter Preffers make everything (including attributes) Widgets (elements) for seperation of responsibility
         padding: const EdgeInsets.all(30.0),
-        child: Text(pair.asLowerCase, style: style, semanticsLabel: "${pair.first} ${pair.second}",),
+        child: Text(
+          pair.asLowerCase,
+          style: style,
+          semanticsLabel: "${pair.first} ${pair.second}",
+        ),
       ),
     );
   }
