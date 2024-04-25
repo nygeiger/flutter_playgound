@@ -1,18 +1,3 @@
-// import 'package:flutter/material.dart';
-
-// void main() {
-//   runApp(MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }
-
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +19,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.cyan),
         ),
-        home: const MyHomePage(),
+        home: MyHomePage(),
       ),
     );
   }
@@ -61,7 +46,7 @@ class MyAppState extends ChangeNotifier {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+/* class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
   @override
@@ -125,7 +110,137 @@ class MyHomePage extends StatelessWidget {
       ),
     );
   }
+} */
+
+// ...
+
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          SafeArea( // The SafeArea ensures that its child is not obscured by a hardware notch or a status bar. 
+            child: NavigationRail(
+              extended: false,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite),
+                  label: Text('Favorites'),
+                ),
+              ],
+              selectedIndex: 0,
+              onDestinationSelected: (value) {
+                print('selected: $value');
+              },
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: GeneratorPage(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
+class GeneratorPage extends StatelessWidget {
+  const GeneratorPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var pair = appState.currentWordPair;
+
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
+    return Center(
+      // child: Column(
+      //   mainAxisAlignment: MainAxisAlignment.center,
+      //   children: [
+      //     BigCard(pair: pair),
+      //     SizedBox(height: 10),
+      //     Row(
+      //       mainAxisSize: MainAxisSize.min,
+      //       children: [
+      //         ElevatedButton.icon(
+      //           onPressed: () {
+      //             appState.toggleFavorite();
+      //           },
+      //           icon: Icon(icon),
+      //           label: Text('Like'),
+      //         ),
+      //         SizedBox(width: 10),
+      //         ElevatedButton(
+      //           onPressed: () {
+      //             appState.getNext();
+      //           },
+      //           child: Text('Next'),
+      //         ),
+      //       ],
+      //     ),
+      //   ],
+      // ),
+      child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // const Padding(padding: EdgeInsets.only(left: 450)),
+          // const Padding( padding: EdgeInsets.only(left: 100), child: Text('A random Starter App idea:')),
+          const Text('A random Starter App idea:'),
+          const SizedBox(
+            height: 10,
+          ),
+          BigCard(pair: pair),
+          const SizedBox(
+            height: 15,
+          ),
+
+          // Added this button
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  print('Like button pressed');
+                  // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                  appState.toggleFavorite();
+                },
+                icon: Icon(icon),
+                label: const Text('Like'),
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  print('Next button pressed');
+                  // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                  appState.getNext();
+                },
+                child: const Text('Next'),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// ...
 
 class BigCard extends StatelessWidget {
   const BigCard({
