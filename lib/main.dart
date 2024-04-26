@@ -114,14 +114,38 @@ class MyAppState extends ChangeNotifier {
 
 // ...
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+/// Underscore precending class name makes it private => https://dart.dev/language/libraries
+
+class _MyHomePageState extends State<MyHomePage> {
+  
+  int selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = const Placeholder();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
     return Scaffold(
       body: Row(
         children: [
-          SafeArea( // The SafeArea ensures that its child is not obscured by a hardware notch or a status bar. 
+          SafeArea(
+            // The SafeArea ensures that its child is not obscured by a hardware notch or a status bar.
             child: NavigationRail(
               extended: false,
               destinations: const [
@@ -134,16 +158,21 @@ class MyHomePage extends StatelessWidget {
                   label: Text('Favorites'),
                 ),
               ],
-              selectedIndex: 0,
+              selectedIndex: selectedIndex,
               onDestinationSelected: (value) {
                 print('selected: $value');
+
+                setState(() {
+                  // use setState callback with anonymous function to set state value
+                  selectedIndex = value;
+                });
               },
             ),
           ),
           Expanded(
             child: Container(
               color: Theme.of(context).colorScheme.primaryContainer,
-              child: GeneratorPage(),
+              child: page,
             ),
           ),
         ],
