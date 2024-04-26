@@ -1,18 +1,3 @@
-// import 'package:flutter/material.dart';
-
-// void main() {
-//   runApp(MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }
-
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,43 +17,287 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.cyan),
         ),
-        home: const MyHomePage(),
+        home: MyHomePage(),
       ),
     );
   }
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+  var currentWordPair = WordPair.random();
 
-  void getNext(){ notifyListeners(); current = WordPair.random(); /*notifyListeners();*/ } // order doesn't matter
+  void getNext() {
+    notifyListeners();
+    currentWordPair = WordPair.random(); /*notifyListeners();*/
+  } // order doesn't matter. (Adds to stack and value has already changed by the time it's popped??)
+
+  var favorites =
+      <WordPair>[]; // Final?  The <...> portion is considered a "Generic" -> https://dart.dev/language/generics
+
+  void toggleFavorite() {
+    if (favorites.contains(currentWordPair)) {
+      favorites.remove(currentWordPair);
+    } else {
+      favorites.add(currentWordPair);
+    }
+    notifyListeners();
+  }
 }
 
-class MyHomePage extends StatelessWidget {
+/* class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    var pair = appState.currentWordPair;
+
+     // ↓ Add this.
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
 
     return Scaffold(
-      body: Column(
+      body: Center(
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // const Padding(padding: EdgeInsets.only(left: 450)),
+            // const Padding( padding: EdgeInsets.only(left: 100), child: Text('A random Starter App idea:')),
+            const Text('A random Starter App idea:'),
+            const SizedBox(
+              height: 10,
+            ),
+            BigCard(pair: pair),
+            const SizedBox(
+              height: 15,
+            ),
+
+            // Added this button
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    print('Like button pressed');
+                    // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                    appState.toggleFavorite();
+                  },
+                  icon: Icon(icon),
+                  label: const Text('Like'),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    print('Next button pressed');
+                    // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                    appState.getNext();
+                  },
+                  child: const Text('Next'),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+} */
+
+// ...
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+/// Underscore precending class name makes it private => https://dart.dev/language/libraries
+
+class _MyHomePageState extends State<MyHomePage> {
+  
+  int selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget page;
+    switch (selectedIndex) {
+      case 0:
+        page = GeneratorPage();
+        break;
+      case 1:
+        page = const Placeholder();
+        break;
+      default:
+        throw UnimplementedError('no widget for $selectedIndex');
+    }
+
+    return Scaffold(
+      body: Row(
         children: [
-          const Text('A random BS idea:'),
-          Text(appState.current.asLowerCase),
+          SafeArea(
+            // The SafeArea ensures that its child is not obscured by a hardware notch or a status bar.
+            child: NavigationRail(
+              extended: false,
+              destinations: const [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite),
+                  label: Text('Favorites'),
+                ),
+              ],
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (value) {
+                print('selected: $value');
+
+                setState(() {
+                  // use setState callback with anonymous function to set state value
+                  selectedIndex = value;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: page,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GeneratorPage extends StatelessWidget {
+  const GeneratorPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var pair = appState.currentWordPair;
+
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
+    return Center(
+      // child: Column(
+      //   mainAxisAlignment: MainAxisAlignment.center,
+      //   children: [
+      //     BigCard(pair: pair),
+      //     SizedBox(height: 10),
+      //     Row(
+      //       mainAxisSize: MainAxisSize.min,
+      //       children: [
+      //         ElevatedButton.icon(
+      //           onPressed: () {
+      //             appState.toggleFavorite();
+      //           },
+      //           icon: Icon(icon),
+      //           label: Text('Like'),
+      //         ),
+      //         SizedBox(width: 10),
+      //         ElevatedButton(
+      //           onPressed: () {
+      //             appState.getNext();
+      //           },
+      //           child: Text('Next'),
+      //         ),
+      //       ],
+      //     ),
+      //   ],
+      // ),
+      child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // const Padding(padding: EdgeInsets.only(left: 450)),
+          // const Padding( padding: EdgeInsets.only(left: 100), child: Text('A random Starter App idea:')),
+          const Text('A random Starter App idea:'),
+          const SizedBox(
+            height: 10,
+          ),
+          BigCard(pair: pair),
+          const SizedBox(
+            height: 15,
+          ),
 
           // Added this button
-          ElevatedButton(
-            onPressed: () {
-              print('button pressed');
-              // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
-              appState.getNext();
-            },
-            child: const Text('Next'),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  print('Like button pressed');
+                  // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                  appState.toggleFavorite();
+                },
+                icon: Icon(icon),
+                label: const Text('Like'),
+              ),
+              const SizedBox(
+                width: 20,
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  print('Next button pressed');
+                  // appState.current = WordPair.random();  //Changes data under the hood but doesn't update ui
+                  appState.getNext();
+                },
+                child: const Text('Next'),
+              ),
+            ],
           )
         ],
+      ),
+    );
+  }
+}
+
+// ...
+
+class BigCard extends StatelessWidget {
+  const BigCard({
+    super.key,
+    required this.pair,
+  });
+
+  final WordPair pair;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme =
+        Theme.of(context); // For consistency, use already defined theme
+
+    /// Calling copyWith() on displayMedium returns a copy of the text style with the changes you define.
+    final style = theme.textTheme.displayMedium!
+        .copyWith(color: theme.colorScheme.onPrimary);
+
+    return Card(
+      color: theme.colorScheme.primary,
+      child: Padding(
+        // Flutter Preffers make everything (including attributes) Widgets (elements) for seperation of responsibility
+        padding: const EdgeInsets.all(30.0),
+        child: Text(
+          pair.asLowerCase,
+          style: style,
+          semanticsLabel: "${pair.first} ${pair.second}",
+        ),
       ),
     );
   }
